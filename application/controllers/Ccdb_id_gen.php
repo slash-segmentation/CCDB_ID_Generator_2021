@@ -73,7 +73,56 @@ class Ccdb_id_gen extends CI_Controller
         $this->load->view('templates/footer', $data);
     }
     
+    public function select_experiment()
+    {
+        $this->load->library('session');
+        $this->load->helper('url');
+        $base_url = $this->config->item('base_url');
+        $data['base_url'] = $base_url;
+        
+        $projectID = $this->input->post('project_list', TRUE);
+        $this->session->set_userdata('projectID', $projectID);
+        
+        $dbutil = new DBUtil();
+        $eArray = $dbutil->getExperimentByProjectID($projectID);
+        
+        $e_json_str = json_encode($eArray);
+        $eJson = json_decode($e_json_str);
+        
+        $data['eArray'] = $eJson;
+        
+        $this->load->view('templates/header', $data);
+        $this->load->view('main/select_experiment', $data);
+        $this->load->view('templates/footer', $data);
+        
+    }
     
+    public function create_microscopy()
+    {
+        $this->load->library('session');
+        $this->load->helper('url');
+        $base_url = $this->config->item('base_url');
+        $data['base_url'] = $base_url;
+        
+        $experimentID = $this->input->post('experiment_list', TRUE);
+        $this->session->set_userdata('experimentID', $experimentID);
+        
+        $this->load->view('templates/header', $data);
+        $this->load->view('create/create_microscopy', $data);
+        $this->load->view('templates/footer', $data);
+    }
+    
+    
+    public function submit_microscopy()
+    {
+        $this->load->library('session');
+        $this->load->helper('url');
+        $base_url = $this->config->item('base_url');
+        $data['base_url'] = $base_url;
+        
+        $imageBasename = $this->input->post('image_basename', TRUE);
+        echo "<br/>Image basename:".$imageBasename;
+    }
     
 }
 

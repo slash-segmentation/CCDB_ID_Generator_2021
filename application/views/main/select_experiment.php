@@ -2,30 +2,30 @@
 <table>
     <tr >
         <td>
-            <h3><u>Select a project:</u></h3>
+            <h3><u>Select an experiment:</u></h3>
         </td>
             
     </tr>
 </table>
 </center>
 
-<form action="/Ccdb_id_gen/select_experiment" method="post" onsubmit="return validateUser()">
+<form action="/Ccdb_id_gen/create_microscopy" method="post" onsubmit="return validateUser()">
 <?php
    // var_dump($userArray);
 
 ?>
 <br/>
 <center>
-<select id="project_list" name="project_list" size="20">
+<select id="experiment_list" name="experiment_list" size="20">
     <?php
     
-        foreach($pArray as $project)
+        foreach($eArray as $exp)
         {
-            $desc = "";
-            if(strlen($project->Project_desc)> 30)
-                $desc = substr($project->Project_desc, 0, 30);
+            $purpose = "";
+            if(strlen($exp->Experiment_purpose)> 30)
+                $purpose = substr($exp->Experiment_purpose, 0, 30);
     ?> 
-            <option value="<?php echo $project->Project_id; ?>"><?php echo $project->Project_id."-----".$project->Project_name."------".$desc; ?></option>
+            <option value="<?php echo $exp->Experiment_id; ?>"><?php echo $exp->Experiment_id."-----".$exp->Experiment_title."------".$purpose; ?></option>
         
     <?php
         }
@@ -56,12 +56,12 @@
 <script> 
     function validateUser()
     {
-        var sel = document.getElementById('user_list');
+        var sel = document.getElementById('experiment_list');
         //alert(sel.selectedIndex);
         var index = sel.selectedIndex;
         if(index < 0)
         {
-            alert("You have to select a user to continue");
+            alert("You have to select an experiment to continue");
             return false;
         }
         

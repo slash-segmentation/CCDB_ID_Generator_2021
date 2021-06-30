@@ -52,6 +52,9 @@
 
 
 <script> 
+    
+    var cig_scope_idx = "CIG_scope_index";
+    
     function validateScope()
     {
         var sel = document.getElementById('scope_list');
@@ -62,8 +65,22 @@
             alert("You have to select a scope to continue");
             return false;
         }
+        else
+        {
+            setCookie(cig_scope_idx,index,365); 
+        }
         
         return true;
+    }
+    
+    var scope_index = getCookie(cig_scope_idx);
+    if(scope_index)
+    {
+        document.getElementById('scope_list').selectedIndex  = scope_index;
+    }
+    else
+    {
+        document.getElementById('scope_list').selectedIndex  = 0;
     }
     
 </script>

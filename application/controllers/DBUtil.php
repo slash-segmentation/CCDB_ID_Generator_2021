@@ -114,6 +114,215 @@ class DBUtil
     }
     
     
+    public function getExperimentByProjectID($project_id)
+    {
+        $CI = CI_Controller::get_instance();
+        $db_params = $CI->config->item('db_params');
+        $conn = pg_pconnect($db_params);
+        $array = array();
+        if(!$conn)
+        {
+            return $array;
+        }
+        $input = array();
+        array_push($input,$project_id."");
+        $sql = "\n select e.experiment_id, e.experiment_title, ".
+            "\n e.experiment_purpose, e.experiement_date as experiment_date ".
+            "\n from project p, experiment e ".
+            "\n where  p.project_id = e.project_id and p.project_id = $1 order by e.experiment_id desc";
+        $result = pg_query_params($conn,$sql,$input);
+        if (!$result) 
+        {
+            pg_close($conn);
+            return $array;
+        }
+        $array = $this->handleGetExperimentResults($result);
+        pg_close($conn);
+        return $array;
+       
+    }
+    
+    
+    public function inserMicroscopy($json)
+    {
+        //error_log("inserMicroscopy", 3, "C:/Test/rest_log.txt");
+        $isInvalid = false;
+        if(is_null($json))
+        {
+            $isInvalid = true;
+        }
+        else if(!isset($json->Microscopy->Experiment_id)
+                || !isset($json->Microscopy->Image_basename)
+                || !isset($json->Microscopy->User)
+                || !isset($json->Microscopy->Description)
+                )
+        {
+            $isInvalid = true;
+        }
+        if($isInvalid)
+        {
+            $errorMessage = "";
+            if(!isset($json->Microscopy->Experiment_id))
+                $errorMessage = "Missing Experiment_id";
+            if(!isset($json->Microscopy->Image_basename))
+                $errorMessage = "Missing basename";
+            if(!isset($json->Microscopy->User))
+                $errorMessage = "Missing user";
+            if(!isset($json->Microscopy->Description))
+                $errorMessage = "Missing description";
+            $array = $this->getErrorArray("Invalid JSON input:".$errorMessage);
+            return $array;
+        }
+        
+        
+        
+        $id = -1;
+        $idArray = $this->getNextID();
+        if($idArray[$this->success])
+        {
+            $id = $idArray['ID'];
+        }
+        else
+        {
+            return $idArray;
+        }
+        
+        
+        $CI = CI_Controller::get_instance();
+        $db_params = $CI->config->item('db_params');
+        $conn = pg_pconnect($db_params);
+        if(!$conn)
+        {
+            $array = $this->getErrorArray("Cannot establish a db connection.");
+            return $array;
+        }
+        
+        
+        if(!isset($json->Microscopy->Microscope_name))
+        {
+            //error_log("Not Set:".json_encode($json), 3, "C:/Test/rest_log.txt");
+            $sql = "insert into microscopy_products(mpid, experiment_experiment_id, image_basename,portal_screenname,notes,modified_date) ".
+                   " values($1,$2,$3,$4,$5,now())";
+            $input = array();
+            array_push($input,$id."");
+            array_push($input,$json->Microscopy->Experiment_id."");
+            array_push($input,$json->Microscopy->Image_basename);
+            array_push($input,$json->Microscopy->User);
+            array_push($input,$json->Microscopy->Description);
+        }
+        else 
+        {
+            //error_log("Set:".json_encode($json), 3, "C:/Test/rest_log.txt");
+            $sql = "insert into microscopy_products(mpid, experiment_experiment_id, image_basename,portal_screenname,notes,scope_name,modified_date) ".
+                   " values($1,$2,$3,$4,$5,$6,now())";
+            $input = array();
+            array_push($input,$id."");
+            array_push($input,$json->Microscopy->Experiment_id."");
+            array_push($input,$json->Microscopy->Image_basename);
+            array_push($input,$json->Microscopy->User);
+            array_push($input,$json->Microscopy->Description);
+            array_push($input,$json->Microscopy->Microscope_name);
+        }
+        
+        
+        $result = pg_query_params($conn,$sql,$input);
+        if (!$result) 
+        {
+            $message = "Error occurs during the SQL execution:".pg_last_error();
+            $message = htmlspecialchars($message);
+            $array = $this->getErrorArray($message);
+            pg_close($conn);
+            return $array;
+        }
+        pg_close($conn);
+        $array = array();
+        $array[$this->success] = true;
+        $array['Microscopy_id'] = intval($id."");
+        return $array;
+    }
+    
+    
+    private function getNextID()
+    {
+        $project_id = -1;
+        $CI = CI_Controller::get_instance();
+        $db_params = $CI->config->item('db_params');
+        $conn = pg_pconnect($db_params);
+        if(!$conn)
+        {
+            $array = $this->getErrorArray("Cannot establish a db connection.");
+            return $array;
+        }
+        $sql = "select nextval('general_sequence')";
+        $result = pg_query($conn,$sql);
+        if (!$result) 
+        {
+            $message = "Error occurs during the SQL execution:".pg_last_error();
+            $message = htmlspecialchars($message);
+            $array = $this->getErrorArray($message);
+            pg_close($conn);
+            return $array;
+        }
+        if($row = pg_fetch_row($result))
+        {
+            $project_id = $row[0];
+        }
+        pg_close($conn);
+        $array = array();
+        $array[$this->success] = true;
+        $array['ID'] = intval($project_id."");
+        return $array;
+    }
+    
+    
+    private function handleGetExperimentResults($result)
+    {
+        $array = array();
+        $eArray = array();
+        while($row = pg_fetch_row($result))
+        {
+            $experiment = array();
+            $experiment_id = $row[0]; //experiment_id 
+            $experiment["Experiment_id"] = intval($experiment_id);
+            
+            $experiment_title = $row[1]; //experiment_title
+            if(!is_null($experiment_title))
+            {
+                $experiment["Experiment_title"] = $experiment_title;
+            }
+            else 
+            {
+                $experiment["Experiment_title"] = "";
+            }
+                
+            $experiment_purpose = $row[2]; //experiment_purpose
+            if(!is_null($experiment_purpose))
+            {
+                $experiment['Experiment_purpose'] = $experiment_purpose;
+            }
+            else 
+            {
+                $experiment['Experiment_purpose'] = "";
+            }
+            $experiment_date = $row[3]; //experiment_date
+            if(!is_null($experiment_date))
+            {
+                $format = 'm/d/Y';
+                try
+                {
+                    $date = new DateTime($experiment_date);
+                    $experiment['Experiment_date'] = $date->format('m-d-Y');
+                }
+                catch(Exception $e)
+                {}
+                   
+            }
+            array_push($eArray, $experiment);
+        }
+        
+        
+        return $eArray;
+    }
     private function handleGetScopeNameResults($result)
     {
         $array = array();
