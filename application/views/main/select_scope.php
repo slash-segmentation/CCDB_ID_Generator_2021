@@ -23,7 +23,8 @@
         {
            
     ?> 
-            <option value="<?php echo $scope->Id; ?>"><?php echo $scope->Scope_name; ?></option>
+            <!-- <option value="<?php echo $scope->Id; ?>"><?php echo $scope->Scope_name; ?></option> -->
+            <option value="<?php echo $scope->Scope_name; ?>"><?php echo $scope->Scope_name; ?></option>
         
     <?php
         }

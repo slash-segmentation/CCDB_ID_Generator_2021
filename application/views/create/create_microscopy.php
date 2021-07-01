@@ -13,10 +13,17 @@
 <form action="/Ccdb_id_gen/submit_microscopy" method="post" onsubmit="return validateMP()">
 <br/>
 <center>
-    <table style="width:30%;" >
+    <table style="width:40%;" >
         <tr>
-            <td style="width:20%;">Image basename:</td>
-            <td style="width:80%;"><input type="text" id="image_basename" name="image_basename"></td>
+            <td style="width:30%;">Image basename:</td>
+            <td style="width:70%;"><input type="text" id="image_basename" name="image_basename"></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width:30%;">Description:</td>
+            <td style="width:70%;"><input type="text" id="description" name="description"  size="100"></td>
         </tr>
         
     </table>

@@ -40,3 +40,32 @@
             </tr>
         </table>
     
+    <br/>
+    <?php
+    
+        if(isset($userName))
+        { 
+    ?>
+    <center>
+        <table style="width:50%;" cellspacing="0" cellpadding="0">
+            <tr>
+                <td style="width: 100%"><?php echo "/".$userName; ?>
+                <?php
+                    if(isset($projectID))
+                    {
+                         echo "/Project:".$projectID; 
+                    }
+                    
+                    if(isset($experimentID))
+                    {
+                        echo "/Experiment:".$experimentID; 
+                    }
+                ?>
+                </td>
+            </tr>
+     
+        </table>
+    </center>
+    <?php
+        }
+    ?>
